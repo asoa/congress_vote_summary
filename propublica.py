@@ -22,8 +22,8 @@ class ProPublica:
         bills = json.loads(response)['results']['votes']  # create json object from str
 
         for vote in bills:
-            if 'bill_id' in vote['bill']:
-                d = {vote['bill']['bill_id']:
+            if 'bill_id' in vote['bill']:  # checks for bill_id, indicating that the vote is for a bill
+                d = {vote['bill']['bill_id']:  # creates a dictionary with key(bill_id)
                          [vote['chamber'],vote['roll_call'],vote['bill']['title'],vote['date'],vote['result'],
                           vote['democratic']['yes'],vote['democratic']['no'],
                           vote['republican']['yes'],vote['republican']['no'],
@@ -39,27 +39,26 @@ class ProPublica:
         GET https://api.propublica.org/congress/v1/{congress}/{chamber}/sessions/1/votes/{roll-call-number}.json
         """
         vote_tally = []  # list of default dict objects
-        for vote in self.votes:
+        for vote in self.votes:  # iterate over vote dictionaries
             for k,v in vote.items():
-                d = defaultdict(list)
+                d = defaultdict(list)  # instantiates a dictionary with a value of an empty list
                 roll_call_id = v[1]
                 url = f'https://api.propublica.org/congress/v1/115/senate/sessions/1/votes/{roll_call_id}.json'
                 headers = {'X-API-Key': self.api_key}
                 response = requests.get(url, headers=headers).text
 
                 representatives = json.loads(response)['results']['votes']['vote']['positions']
-                for rep in representatives:
+                for rep in representatives:  # iterates over each congressman and appends their info and vote to the default list
                     d[roll_call_id].append([rep['member_id'],rep['name'],rep['party'],rep['state'],rep['vote_position']])
-                vote_tally.append(d)
+                vote_tally.append(d)  # appends the dictionary with voting information to vote_tally
 
-        for bill in vote_tally:
+        for bill in vote_tally:  # iterate over each vote result
             roll_call_id = list(bill.keys())[0]
+            #  loop over each roll and its list of voting results by member of congress -- filter the yes votes
             bill_yes = [rep[1] for roll_call,lists in bill.items() for rep in lists if rep[4] == 'Yes']
             bill_no = [rep[1] for roll_call, lists in bill.items() for rep in lists if rep[4] == 'No']
+            #  dictionary with roll_call_id as key and nested dict values with yes and no as keys
             self.bill_vote_results[roll_call_id] = {'yes': bill_yes, 'no': bill_no}
-            # print(bill_yes)
-            # print(bill_no)
-
 
     def get_twitter_accounts(self):
         """
@@ -76,7 +75,6 @@ class ProPublica:
         """
 
         # TODO: create dataframe from records in self.votes created in get_recent_bills()
-
 
     def write_db(self):
         """ write data to mongo """
