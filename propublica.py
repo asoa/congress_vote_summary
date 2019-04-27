@@ -19,6 +19,7 @@ class ProPublica:
             bill_vote_results (list) of dict objects of the bill voting summary result
             vote_tally: (list) of dict objects of bill votes by senator
         """
+        # TODO: implement getter function for data objects or convert to class objects
         self.kwargs = {k:v for k,v in kwargs.items()}
         self.secrets = secrets_BU.passwords
         self.mongo_init = self.kwargs.get('mongo_init', False)
@@ -31,12 +32,17 @@ class ProPublica:
 
         # method calls
         if self.kwargs.get('data_init'):
-            self.get_senators()
-            self.get_recent_bills()
-            self.get_roll_call()
-            self.save_data()
-        else:
-            self.senators, self.bills, self.bill_vote_results, _ = load_json()
+            self.data_init()
+
+        else:  # load data from disk
+            self.senators, self.bills, self.bill_vote_results, self.vote_tally = load_json()
+
+    def data_init(self):
+        """ refresh all data from api sources """
+        self.get_senators()
+        self.get_recent_bills()
+        self.get_roll_call()
+        self.save_data()
 
     def get_senators(self):
         """ get senator information """
@@ -56,6 +62,7 @@ class ProPublica:
     def get_recent_bills(self):
         """ connect to votes endpoint to get the most recent votes """
 
+        # TODO: implement paginate to api request to get more bills
         url = 'https://api.propublica.org/congress/v1/both/votes/recent.json'
         response = requests.get(url, headers=self.headers).text  # returns str
         bills = json.loads(response)['results']['votes']  # create json object from str
@@ -73,9 +80,6 @@ class ProPublica:
             else:  # vote was not a bill (i.e. 'nomination')
                 continue
         return self.bills
-        # self.write_db('bills')
-
-        # [print(vote) for vote in votes]
 
     def get_roll_call(self):
         """ connect to vote endpoint to get roll call votes for all recent bills
@@ -105,35 +109,9 @@ class ProPublica:
             for k,v in bill.items():
                 bill_yes = [rep['member_id'] for rep in v if rep['vote'] == 'Yes']
                 bill_no = [rep['member_id'] for rep in v if rep['vote'] == 'No']
-            # bill_yes = [rep[1] for roll_call,lists in bill.items() for rep in lists if rep[4] == 'Yes']
-            #  loop over each roll and its list of voting results by member of congress -- filter the no votes
-            # bill_no = [rep[1] for roll_call, lists in bill.items() for rep in lists if rep[4] == 'No']
-            #  dictionary with roll_call_id as key and nested dict values with yes and no as keys
-            # self.bill_vote_results[roll_call_id] = {'yes': bill_yes, 'no': bill_no}
                 self.bill_vote_results.append({'roll_call': roll_call_id, 'yes': bill_yes, 'no': bill_no})
 
         return self.bill_vote_results
-        # self.write_db('roll_call')
-
-    def neo4j_init(self):
-        """ create senator and bill neo4j nodes """
-        self.neo4j_driver.create_senators()
-
-    def get_twitter_accounts(self):
-        """
-        create dataframe of the twitter accounts (from congress-legislatures) for all of congress, then write to mongo db
-        schema: [account_collection] person: twitter_handle  [tweet_collection] person: tweet(text_only)
-
-        """
-
-    def bill_summary_stats(self):
-        """
-        create df with relevant data
-        index=bill_name columns=[bill_id, title, latest_action, date, vote_type, roll_call, d_votes, r_votes, result]
-
-        """
-
-        # TODO: create dataframe from records in self.votes created in get_recent_bills()
 
     def write_db(self, collection_name):
         """ write data to mongo """

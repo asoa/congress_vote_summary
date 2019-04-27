@@ -1,21 +1,8 @@
 version: '3.1'
 
+# TODO: docker interation
+
 services:
-  mongo:
-    image: mongo
-    restart: always
-    ports:
-      - 27017:27017
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: <changeme>
-      ME_CONFIG_MONGODB_ADMINPASSWORD: <changeme>
-
   python:
     build: python_build/
 

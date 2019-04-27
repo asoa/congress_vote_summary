@@ -40,7 +40,7 @@ def load_json():
     with open('data/roll_call.json', 'r') as c:
         roll_call = [json.loads(x) for x in c.readlines()]
     with open('data/tally.json', 'r') as d:
-        tally = [json.loads(x) for x in c.readlines()]
+        tally = [json.loads(x) for x in d.readlines()]
 
-    return senators, votes, roll_call
+    return senators, votes, roll_call, tally
 
