@@ -3,17 +3,6 @@
 from py2neo import Graph, Node, Relationship
 import traceback
 
-#TODO
-"""
-
-build a neo4j application hosted on the heroku website that gives the user the ability to search for bills and see
-the graph of votes
-
-# https://github.com/neo4j-examples/movies-python-bolt/blob/master/movies.py
-# https://neo4j.com/developer/example-project/#_github
-
-"""
-
 
 class Neo4j:
     def __init__(self, **kwargs):
@@ -46,7 +35,7 @@ class Neo4j:
     def create_senators(self, senators):
         """ create senator graph objects in neo4j """
         print("***** creating senator nodes *****")
-        [self.graph.create(Node('Senator', senator['party'], id=senator['id'], name=senator['first_name'] + ' ' + senator['last_name'],
+        [self.graph.create(Node('Senator', senator['party'], id=senator['id'], first_name=senator['first_name'], last_name=senator['last_name'],
                                 gender=senator['gender'], party=senator['party'], twitter_account=senator['twitter_account'],
                                 state=senator['state'])) for senator in senators]
 

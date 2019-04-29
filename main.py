@@ -5,8 +5,8 @@ from graph import Neo4j
 
 
 def main():
-    data = ProPublica(mongo_init=False, data_init=True)
-    graph = Neo4j(graph_init=True, data_object=data)
+    data = ProPublica(mongo_init=False, data_init=False)
+    graph = Neo4j(graph_init=False, data_object=data)
 
     # create tweet nodes #TODO
 
